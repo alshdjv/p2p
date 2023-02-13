@@ -33,11 +33,41 @@ final class P2PViewController: UIViewController {
     private let cardTextField: UITextField = {
         let textField = UITextField()
         textField.autocorrectionType = .no
-        textField.text = "Введите номер карты"
+        textField.placeholder = "Введите номер карты"
         textField.textColor = UIColor(red: 170/255, green: 171/255, blue: 173/255, alpha: 1.0)
         textField.font = .systemFont(ofSize: 17)
         textField.becomeFirstResponder()
         return textField
+    }()
+    
+    // MIDDLE PART
+    private let receiverView: UIView = {
+        let view = UIView()
+        view.backgroundColor = Colors.greyCol
+        view.layer.cornerRadius = 20.0
+        return view
+    }()
+    
+    private let receiverIcon: UIImageView = {
+        let image = UIImage(named: "friendImg")
+        let imageView = UIImageView(image: image?.withRenderingMode(.alwaysOriginal))
+        imageView.clipsToBounds = true
+        return imageView
+    }()
+    
+    private let cardsView: UIView = {
+        let view = UIView()
+        view.backgroundColor = Colors.greyCol
+        view.layer.cornerRadius = 20.0
+        return view
+    }()
+    
+    private let buttonsStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.alignment = .center
+        stackView.distribution = .equalCentering
+        return stackView
     }()
 
     override func viewDidLoad() {
@@ -55,9 +85,14 @@ final class P2PViewController: UIViewController {
     
     private func setSubviews() {
         self.view.addSubview(headerLabel)
+        
+        // Header
         self.view.addSubview(headView)
         self.headView.addSubview(cardIcon)
         self.headView.addSubview(cardTextField)
+        
+        // Middle
+        self.view.addSubview(receiverView)
     }
     
     private func setConstraints() {
@@ -67,6 +102,7 @@ final class P2PViewController: UIViewController {
             make.centerX.equalTo(self.view.safeAreaLayoutGuide)
         }
         
+        // Header Part
         headView.snp.makeConstraints { make in
             make.top.equalTo(self.headerLabel.snp.bottom).offset(24)
             make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(16)
@@ -86,6 +122,8 @@ final class P2PViewController: UIViewController {
             make.leading.equalTo(self.cardIcon.snp.trailing).offset(14)
             make.bottom.equalTo(self.headView.snp.bottom).offset(-18)
         }
+        
+        // Middle Part
     }
     
     // MARK: - Methods
