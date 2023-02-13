@@ -1,10 +1,12 @@
 import UIKit
+import SnapKit
 
-class P2PViewController: UIViewController {
+final class P2PViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .systemGray
+        
     }
 }
 
