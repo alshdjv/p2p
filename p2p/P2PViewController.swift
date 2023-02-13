@@ -30,9 +30,8 @@ final class P2PViewController: UIViewController {
     private func setConstraints() {
         
         headerLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(59)
-            make.leading.equalToSuperview().offset(148)
-            make.trailing.equalToSuperview().offset(148)
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(30)
+            make.centerX.equalTo(self.view.safeAreaLayoutGuide)
         }
     }
 }
