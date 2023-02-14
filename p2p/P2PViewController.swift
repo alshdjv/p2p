@@ -268,8 +268,8 @@ final class P2PTableViewCell: UITableViewCell {
         return button
     }()
     
-    override init(frame: CGRect, style: UITableView.Style) {
-        super.init(frame: frame, style: style)
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.backgroundColor = .systemBackground
         
         self.setupCellUI()
