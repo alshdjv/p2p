@@ -9,7 +9,6 @@ struct BankInfo {
     let clientName: String?
     let clientCard: String?
     let bankImage: String?
-    let deleteBtn: String?
 }
 
 // MARK: - HeaderView
@@ -265,12 +264,36 @@ final class P2PTableViewCell: UITableViewCell {
     
     private let deleteButton: UIButton = {
         let button = UIButton()
+        button.setImage(UIImage(named: "cardDeleteImg")?.withRenderingMode(.alwaysOriginal), for: .normal)
         return button
     }()
     
+    // Observers
+    var bankItem: BankInfo? {
+            didSet {
+                guard let bankItem = bankItem else {return}
+                    
+                if let name = bankItem.clientName {
+                    nameLabel.text = "\(name)"
+                }
+                          
+                if let card = bankItem.clientCard {
+                    cardLabel.text = "\(card)"
+                }
+                    
+                if let avatar = bankItem.bankImage {
+                    bankIcon.image = UIImage(named: avatar)?.withRenderingMode(.alwaysOriginal)
+                }
+            }
+        }
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.backgroundColor = .systemBackground
+        self.contentView.backgroundColor = .systemBackground
+        
+        if self.selectedBackgroundView == nil {
+            self.selectedBackgroundView = UIView()
+        }
         
         self.setupCellUI()
     }
@@ -319,6 +342,30 @@ final class P2PTableViewCell: UITableViewCell {
 // MARK: - Main Controller
 
 final class P2PViewController: UIViewController {
+    
+    let cellData = [
+        BankInfo(clientName: "Alisher Djuraev", clientCard: "8600 31** **** 3593", bankImage: "aloqaImg"),
+        BankInfo(clientName: "Fazliddin Murtazoev", clientCard: "8600 31** **** 4422", bankImage: "agroImg"),
+        BankInfo(clientName: "Malika Tolqinova", clientCard: "8600 31** **** 2332", bankImage: "asakaImg"),
+        BankInfo(clientName: "Mukhammadyor Juraev", clientCard: "8600 31** **** 1111", bankImage: "hamkorImg"),
+        BankInfo(clientName: "Stanislav Tsoy", clientCard: "8600 32** **** 1234", bankImage: "hitechImg"),
+        BankInfo(clientName: "Botir Ruziboev", clientCard: "8600 44** **** 4444", bankImage: "infinImg"),
+        BankInfo(clientName: "Valera Pak", clientCard: "8600 34** **** 1112", bankImage: "ipakyoliImg"),
+        BankInfo(clientName: "Dilmurod Rikhsiboev", clientCard: "8600 31** **** 2345", bankImage: "ipotekaImg"),
+        BankInfo(clientName: "Komoliddin Avazov", clientCard: "8600 31** **** 3234", bankImage: "kapitalImg"),
+        BankInfo(clientName: "Elyor Jumaev", clientCard: "8600 44** **** 4565", bankImage: "kdbImg"),
+        BankInfo(clientName: "Vladimir Kim", clientCard: "8600 33** **** 5555", bankImage: "nbuImg"),
+        BankInfo(clientName: "Zarina Yuldasheva", clientCard: "8600 31** **** 7777", bankImage: "orientfinansImg"),
+        BankInfo(clientName: "Kimberly Kardashian", clientCard: "8600 31** **** 9999", bankImage: "qishloqqurilishImg"),
+        BankInfo(clientName: "Aleksey Voronin", clientCard: "8600 44** **** 2133", bankImage: "savdogarImg"),
+        BankInfo(clientName: "Zukhra Hasanovna", clientCard: "8600 33** **** 2333", bankImage: "sqbImg"),
+        BankInfo(clientName: "Aziz Asadov", clientCard: "8600 31** **** 7557", bankImage: "trastImg"),
+        BankInfo(clientName: "Shakhlo Sarvarova", clientCard: "8600 33** **** 4455", bankImage: "turkistonImg"),
+        BankInfo(clientName: "Nigora Agzamovna", clientCard: "8600 31** **** 3333", bankImage: "turonImg"),
+        BankInfo(clientName: "Rustam Fakhriddinov", clientCard: "8600 44** **** 2454", bankImage: "universalImg"),
+        BankInfo(clientName: "Shoxrux Qodirov", clientCard: "8600 31** **** 3444", bankImage: "xalqImg"),
+        BankInfo(clientName: "Rihanna Fenty", clientCard: "8600 33** **** 9999", bankImage: "ziraatImg")
+    ]
     
     private let headerLabel: UILabel = {
         let label = UILabel()
@@ -436,14 +483,14 @@ final class P2PViewController: UIViewController {
 extension P2PViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return cellData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: P2PTableViewCell.identifier, for: indexPath) as? P2PTableViewCell else {
             return UITableViewCell()
         }
-        
+        cell.bankItem = cellData[indexPath.row]
         return cell
     }
 }
