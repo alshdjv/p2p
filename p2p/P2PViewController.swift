@@ -5,6 +5,13 @@ struct Colors {
     static let greyCol = UIColor(red: 245/255, green: 245/255, blue: 245/255, alpha: 1.0)
 }
 
+struct BankInfo {
+    let clientName: String?
+    let clientCard: String?
+    let bankImage: String?
+    let deleteBtn: String?
+}
+
 // MARK: - HeaderView
 
 final class HeaderView: UIView {
@@ -221,14 +228,87 @@ final class TransferView: UIView {
     }
 }
 
-final class TableViewCell: UITableView {
+// MARK: - TableViewCell
+
+final class P2PTableViewCell: UITableViewCell {
     
-    static let identifier = "TableViewCell"
+    static let identifier = "P2PTableViewCell"
+    
+    private let bankIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.clipsToBounds = true
+        imageView.contentMode = .scaleAspectFill
+        return imageView
+    }()
+    
+    private let nameLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        return label
+    }()
+    
+    private let cardLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 13, weight: .regular)
+        label.textColor = .secondaryLabel
+        return label
+    }()
+    
+    private let middleStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.distribution = .fillEqually
+        stackView.alignment = .leading
+        stackView.spacing = 4
+        return stackView
+    }()
+    
+    private let deleteButton: UIButton = {
+        let button = UIButton()
+        return button
+    }()
     
     override init(frame: CGRect, style: UITableView.Style) {
         super.init(frame: frame, style: style)
         self.backgroundColor = .systemBackground
         
+        self.setupCellUI()
+    }
+    
+    private func setupCellUI() {
+        self.setSubviews()
+        self.setConstraints()
+    }
+    
+    private func setSubviews() {
+        self.addSubview(bankIcon)
+        self.middleStackView.addArrangedSubview(nameLabel)
+        self.middleStackView.addArrangedSubview(cardLabel)
+        self.addSubview(middleStackView)
+        self.addSubview(deleteButton)
+    }
+    
+    private func setConstraints() {
+        
+        bankIcon.snp.makeConstraints { make in
+            make.top.equalTo(self.snp.top).offset(8)
+            make.leading.equalTo(self.snp.leading).offset(16)
+            make.bottom.equalTo(self.snp.bottom).offset(-8)
+            make.size.equalTo(CGSize(width: 48, height: 48))
+        }
+        
+        middleStackView.snp.makeConstraints { make in
+            make.top.equalTo(self.snp.top).offset(12)
+            make.leading.equalTo(self.bankIcon.snp.trailing).offset(12)
+            make.bottom.equalTo(self.snp.bottom).offset(-12)
+        }
+        
+        deleteButton.snp.makeConstraints { make in
+            make.top.equalTo(self.snp.top).offset(24)
+            make.trailing.equalTo(self.snp.trailing).offset(-16)
+            make.bottom.equalTo(self.snp.bottom).offset(-24)
+            make.size.equalTo(CGSize(width: 16, height: 16))
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -262,7 +342,7 @@ final class P2PViewController: UIViewController {
     
     private let tableView: UITableView = {
         let tableView = UITableView()
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.register(P2PTableViewCell.self, forCellReuseIdentifier: P2PTableViewCell.identifier)
         return tableView
     }()
     
@@ -360,8 +440,10 @@ extension P2PViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = "Hello"
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: P2PTableViewCell.identifier, for: indexPath) as? P2PTableViewCell else {
+            return UITableViewCell()
+        }
+        
         return cell
     }
 }
