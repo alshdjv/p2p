@@ -221,6 +221,21 @@ final class TransferView: UIView {
     }
 }
 
+final class TableViewCell: UITableView {
+    
+    static let identifier = "TableViewCell"
+    
+    override init(frame: CGRect, style: UITableView.Style) {
+        super.init(frame: frame, style: style)
+        self.backgroundColor = .systemBackground
+        
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 // MARK: - Main Controller
 
 final class P2PViewController: UIViewController {
@@ -246,7 +261,7 @@ final class P2PViewController: UIViewController {
     }()
     
     private let tableView: UITableView = {
-        let tableView = UITableView(frame: .zero)
+        let tableView = UITableView()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         return tableView
     }()
@@ -255,11 +270,17 @@ final class P2PViewController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
         
-        tableView.delegate = self
-        tableView.dataSource = self
-        
         self.setupUI()
+        self.setupTableView()
         self.dismissKey()
+    }
+    
+    private func setupTableView() {
+        tableView.separatorStyle = .none
+        tableView.separatorColor = .clear
+        tableView.showsVerticalScrollIndicator = false
+        self.tableView.delegate = self
+        self.tableView.dataSource = self
     }
     
     private func setupUI() {
@@ -340,6 +361,7 @@ extension P2PViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.textLabel?.text = "Hello"
         return cell
     }
 }
