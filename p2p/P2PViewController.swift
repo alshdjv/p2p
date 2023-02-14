@@ -145,6 +145,8 @@ final class ReceiverView: UIView {
     }
 }
 
+// MARK: - Transfer View
+
 final class TransferView: UIView {
     
     private let transferIcon: UIImageView = {
@@ -223,10 +225,6 @@ final class TransferView: UIView {
 
 final class P2PViewController: UIViewController {
     
-    private let headView = HeaderView()
-    private let receiverView = ReceiverView()
-    private let transferView = TransferView()
-    
     private let headerLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .semibold)
@@ -234,10 +232,31 @@ final class P2PViewController: UIViewController {
         label.textColor = .black
         return label
     }()
-
+    
+    private let headView = HeaderView()
+    private let receiverView = ReceiverView()
+    private let transferView = TransferView()
+    
+    private let stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.alignment = .center
+        stackView.distribution = .equalSpacing
+        return stackView
+    }()
+    
+    private let tableView: UITableView = {
+        let tableView = UITableView(frame: .zero)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        return tableView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
+        
+        tableView.delegate = self
+        tableView.dataSource = self
         
         self.setupUI()
         self.dismissKey()
@@ -251,8 +270,10 @@ final class P2PViewController: UIViewController {
     private func setSubviews() {
         self.view.addSubview(headerLabel)
         self.view.addSubview(headView)
-        self.view.addSubview(receiverView)
-        self.view.addSubview(transferView)
+        self.stackView.addArrangedSubview(receiverView)
+        self.stackView.addArrangedSubview(transferView)
+        self.view.addSubview(stackView)
+        self.view.addSubview(tableView)
     }
     
     private func setConstraints() {
@@ -269,20 +290,33 @@ final class P2PViewController: UIViewController {
             make.height.equalTo(56)
         }
         
-        receiverView.snp.makeConstraints { make in
+        stackView.snp.makeConstraints { make in
             make.top.equalTo(self.headView.snp.bottom).offset(16)
-            make.leading.equalTo(self.view.snp.leading).offset(16)
+            make.leading.trailing.equalToSuperview().inset(16)
+        }
+        
+        receiverView.snp.makeConstraints { make in
+            make.top.equalTo(self.stackView.snp.top)
+            make.leading.equalTo(self.stackView.snp.leading)
+            make.bottom.equalTo(self.stackView.snp.bottom)
             make.size.equalTo(CGSize(width: 163, height: 88))
         }
         
         transferView.snp.makeConstraints { make in
-            make.top.equalTo(self.headView.snp.bottom).offset(16)
-            make.trailing.equalTo(self.view.snp.trailing).offset(-16)
+            make.top.equalTo(self.stackView.snp.top)
+            make.trailing.equalTo(self.stackView.snp.trailing)
+            make.bottom.equalTo(self.stackView.snp.bottom)
             make.size.equalTo(CGSize(width: 163, height: 88))
+        }
+        
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(self.stackView.snp.bottom).offset(36)
+            make.leading.trailing.equalTo(self.view.safeAreaLayoutGuide)
+            make.bottom.equalTo(self.view.safeAreaLayoutGuide)
         }
     }
     
-    // MARK: - Methods
+    // MARK: - Main Controller Methods
     
     private func dismissKey() {
           let tap: UITapGestureRecognizer = UITapGestureRecognizer( target: self, action: #selector(dismissKeyboard))
@@ -296,3 +330,16 @@ final class P2PViewController: UIViewController {
       }
 }
 
+// MARK: - Main Controller Extension
+
+extension P2PViewController: UITableViewDelegate, UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 10
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        return cell
+    }
+}
