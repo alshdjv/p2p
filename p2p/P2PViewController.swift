@@ -28,6 +28,7 @@ final class HeaderView: UIView {
         textField.placeholder = "Введите номер карты"
         textField.font = .systemFont(ofSize: 17)
         textField.becomeFirstResponder()
+        textField.clearButtonMode = .whileEditing
         return textField
     }()
     
@@ -65,6 +66,7 @@ final class HeaderView: UIView {
         cardTextField.snp.makeConstraints { make in
             make.top.equalTo(self.snp.top).offset(18)
             make.leading.equalTo(self.cardIcon.snp.trailing).offset(14)
+            make.trailing.equalTo(self.snp.trailing).offset(-14)
             make.bottom.equalTo(self.snp.bottom).offset(-18)
         }
     }
