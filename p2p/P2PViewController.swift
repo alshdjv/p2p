@@ -22,11 +22,10 @@ final class HeaderView: UIView {
         return imageView
     }()
     
-    private let cardTextField: UITextField = {
+    public let cardTextField: UITextField = {
         let textField = UITextField()
         textField.autocorrectionType = .no
         textField.placeholder = "Введите номер карты"
-        textField.textColor = UIColor(red: 170/255, green: 171/255, blue: 173/255, alpha: 1.0)
         textField.font = .systemFont(ofSize: 17)
         textField.becomeFirstResponder()
         return textField
@@ -341,7 +340,7 @@ final class P2PTableViewCell: UITableViewCell {
 
 // MARK: - Main Controller
 
-final class P2PViewController: UIViewController {
+final class P2PViewController: UIViewController, UITextFieldDelegate {
     
     let cellData = [
         BankInfo(clientName: "Alisher Djuraev", clientCard: "8600 31** **** 3593", bankImage: "aloqaImg"),
@@ -396,10 +395,11 @@ final class P2PViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
+        self.headView.cardTextField.delegate = self
         
         self.setupUI()
-        self.setupTableView()
         self.dismissKey()
+        self.setupTableView()
     }
     
     private func setupTableView() {
@@ -466,16 +466,26 @@ final class P2PViewController: UIViewController {
     
     // MARK: - Main Controller Methods
     
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let text = (headView.cardTextField.text! as NSString).replacingCharacters(in: range, with: string)
+        if text.isEmpty {
+            self.stackView.isHidden = false
+        } else {
+            self.stackView.isHidden = true
+        }
+        return true
+    }
+    
     private func dismissKey() {
-          let tap: UITapGestureRecognizer = UITapGestureRecognizer( target: self, action: #selector(dismissKeyboard))
-          tap.cancelsTouchesInView = false
-          self.view.addGestureRecognizer(tap)
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer( target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        self.view.addGestureRecognizer(tap)
       }
 
-      @objc func dismissKeyboard() {
-          self.view.endEditing(true)
-          self.resignFirstResponder()
-      }
+    @objc func dismissKeyboard() {
+        self.view.endEditing(true)
+        self.resignFirstResponder()
+    }
 }
 
 // MARK: - Main Controller Extension
