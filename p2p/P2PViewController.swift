@@ -27,7 +27,7 @@ final class HeaderView: UIView {
         return imageView
     }()
     
-    lazy var cardTextField: UITextField = {
+    public var cardTextField: UITextField = {
         let textField = UITextField()
         textField.autocorrectionType = .no
         textField.placeholder = "Введите номер карты"
@@ -35,15 +35,9 @@ final class HeaderView: UIView {
         textField.becomeFirstResponder()
         textField.clearButtonMode = .whileEditing
         textField.keyboardType = .numberPad
-//        textField.addTarget(self, action: #selector(txtValueChanged(_ :)), for: .editingChanged)
         return textField
     }()
-    
-//    var onTextChange: ((String) -> Void)?
-//
-//    @objc func txtValueChanged(_ sender: UITextField) {
-//        onTextChange?("Hello")
-//    }
+
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -355,7 +349,7 @@ final class P2PTableViewCell: UITableViewCell {
 
 // MARK: - Main Controller
 
-final class P2PViewController: UIViewController, UITextFieldDelegate {
+final class P2PViewController: UIViewController {
     
     let cellData = [
         BankInfo(clientName: "Alisher Djuraev", clientCard: "8600 31** **** 3593", bankImage: "aloqaImg"),
@@ -397,8 +391,8 @@ final class P2PViewController: UIViewController, UITextFieldDelegate {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.alignment = .center
-        stackView.distribution = .fillEqually
-        stackView.spacing = 16
+        stackView.distribution = .equalSpacing
+//        stackView.spacing = 16
         return stackView
     }()
     
@@ -411,11 +405,22 @@ final class P2PViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
-        self.headView.cardTextField.delegate = self
+        
+        headView.cardTextField.addTarget(self, action: #selector(txtValueChanged(_ :)), for: .editingChanged)
         
         self.setupUI()
         self.dismissKey()
         self.setupTableView()
+    }
+    
+    @objc func txtValueChanged(_ sender: UITextField) {
+        if sender.text?.count == 0 {
+            self.receiverView.isHidden = false
+            self.transferView.isHidden = false
+        } else {
+            self.receiverView.isHidden = true
+            self.transferView.isHidden = true
+        }
     }
     
     private func setupTableView() {
@@ -457,71 +462,24 @@ final class P2PViewController: UIViewController, UITextFieldDelegate {
         stackView.snp.makeConstraints { make in
             make.top.equalTo(self.headView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(16)
-
         }
         
         receiverView.snp.makeConstraints { make in
-//            make.size.equalTo(CGSize(width: 163, height: 88))
-            make.height.equalTo(88)
+            make.size.equalTo(CGSize(width: 163, height: 88))
         }
 
         transferView.snp.makeConstraints { make in
-//            make.size.equalTo(CGSize(width: 163, height: 88))
-            make.height.equalTo(88)
+            make.size.equalTo(CGSize(width: 163, height: 88))
         }
         
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(self.stackView.snp.bottom).offset(36)
+            make.top.equalTo(self.stackView.snp.bottom).offset(24)
             make.leading.trailing.equalTo(self.view.safeAreaLayoutGuide)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide)
         }
     }
     
     // MARK: - Main Controller Methods
-    
-//    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-//        let text = (headView.cardTextField.text! as NSString).replacingCharacters(in: range, with: string)
-//        if text.isEmpty {
-//            self.stackView.isHidden = false
-//        } else {
-//            self.stackView.isHidden = true
-//        }
-//        return true
-//    }
-    
-//    fileprivate func refreshData(_ hidden: Bool, animated: Bool) {
-//
-//            let maxYPoint: CGFloat = -12
-//            var constant = containerTopConstraint.constant
-//
-//            constant = hidden ? maxYPoint : -62
-//            self.view.setNeedsLayout()
-//            self.view.setNeedsDisplay()
-//            self.view.layoutIfNeeded()
-//
-//            self.containerTopConstraint.constant = constant
-//            self.headerImgTopConstraint.constant = CGFloat(267 + abs(62 + constant))
-//            self.labelBalanceConstraint.constant = constant - 93 + self.textSpacing
-//
-//            if animated
-//            {
-//                UIView.animate(withDuration: 0.5,
-//                               delay: 0,
-//                               usingSpringWithDamping: 0.95,
-//                               initialSpringVelocity: 1,
-//                               options: [.allowUserInteraction,
-//                                         .beginFromCurrentState],
-//                               animations: {
-//                                    self.view.layoutIfNeeded()
-//                    }, completion: { (complete: Bool) in
-//                        self.animator.fractionComplete = 0
-//                    })
-//
-//            } else {
-//                containerTopConstraint.constant = constant
-//                animator.fractionComplete = 0
-//            }
-//        }
     
     private func dismissKey() {
         let tap: UITapGestureRecognizer = UITapGestureRecognizer( target: self, action: #selector(dismissKeyboard))
