@@ -11,14 +11,13 @@ struct BankInfo {
     let bankImage: String?
 }
 
+struct CardIcon {
+    let cardImg: String?
+}
 
 // MARK: - HeaderView
 
 final class HeaderView: UIView {
-    
-    struct ChangeIcon {
-        let cardLogoIcon: String?
-    }
 
     private let cardIcon: UIImageView = {
         let image = UIImage(named: "cardImg")
@@ -37,7 +36,6 @@ final class HeaderView: UIView {
         textField.keyboardType = .numberPad
         return textField
     }()
-
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -349,9 +347,9 @@ final class P2PTableViewCell: UITableViewCell {
 
 // MARK: - Main Controller
 
-final class P2PViewController: UIViewController {
+final class P2PViewController: UIViewController, UITextFieldDelegate {
     
-    let cellData = [
+    var cellData = [
         BankInfo(clientName: "Alisher Djuraev", clientCard: "8600 31** **** 3593", bankImage: "aloqaImg"),
         BankInfo(clientName: "Fazliddin Murtazoev", clientCard: "8600 31** **** 4422", bankImage: "agroImg"),
         BankInfo(clientName: "Malika Tolqinova", clientCard: "8600 31** **** 2332", bankImage: "asakaImg"),
@@ -375,6 +373,9 @@ final class P2PViewController: UIViewController {
         BankInfo(clientName: "Rihanna Fenty", clientCard: "8600 33** **** 9999", bankImage: "ziraatImg")
     ]
     
+    var filteredCellData: [Any] = []
+    var searching: Bool = false
+    
     private let headerLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .semibold)
@@ -392,7 +393,6 @@ final class P2PViewController: UIViewController {
         stackView.axis = .horizontal
         stackView.alignment = .center
         stackView.distribution = .equalSpacing
-//        stackView.spacing = 16
         return stackView
     }()
     
@@ -406,6 +406,7 @@ final class P2PViewController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
         
+        headView.cardTextField.delegate = self
         headView.cardTextField.addTarget(self, action: #selector(txtValueChanged(_ :)), for: .editingChanged)
         
         self.setupUI()
@@ -413,7 +414,7 @@ final class P2PViewController: UIViewController {
         self.setupTableView()
     }
     
-    @objc func txtValueChanged(_ sender: UITextField) {
+    @objc func txtValueChanged(_ sender: AnyObject) {
         if sender.text?.count == 0 {
             self.receiverView.isHidden = false
             self.transferView.isHidden = false
@@ -491,6 +492,22 @@ final class P2PViewController: UIViewController {
         self.view.endEditing(true)
         self.resignFirstResponder()
     }
+    
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool{
+           //input text
+          let searchText  = textField.text! + string
+           //add matching text to arrya
+        filteredCellData = self.cellData.filter({(($0.clientCard!).localizedCaseInsensitiveContains(searchText))})
+           
+           if(filteredCellData.count == 0){
+               searching = false
+           }else{
+               searching = true
+           }
+           self.tableView.reloadData();
+           
+           return true
+       }
 }
 
 // MARK: - Main Controller Extension
@@ -498,14 +515,22 @@ final class P2PViewController: UIViewController {
 extension P2PViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return cellData.count
+        if( searching == true){
+            return filteredCellData.count
+        } else {
+            return cellData.count
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: P2PTableViewCell.identifier, for: indexPath) as? P2PTableViewCell else {
             return UITableViewCell()
         }
-        cell.bankItem = cellData[indexPath.row]
+        if ( searching == true){
+            cell.bankItem = filteredCellData[indexPath.row] as? BankInfo
+        } else {
+            cell.bankItem = cellData[indexPath.row]
+        }
         return cell
     }
 }
