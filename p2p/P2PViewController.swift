@@ -11,13 +11,17 @@ struct BankInfo {
     let bankImage: String?
 }
 
-struct CardIcon {
-    let cardImg: String?
+struct IconInfo {
+    let iconImg: String?
 }
 
 // MARK: - HeaderView
 
 final class HeaderView: UIView {
+    
+    struct CardIcon {
+        let cardLogo: String?
+    }
 
     private let cardIcon: UIImageView = {
         let image = UIImage(named: "cardImg")
@@ -33,7 +37,8 @@ final class HeaderView: UIView {
         textField.font = .systemFont(ofSize: 17)
         textField.becomeFirstResponder()
         textField.clearButtonMode = .whileEditing
-        textField.keyboardType = .numberPad
+        textField.keyboardType = .decimalPad
+
         return textField
     }()
     
@@ -73,6 +78,16 @@ final class HeaderView: UIView {
             make.leading.equalTo(self.cardIcon.snp.trailing).offset(14)
             make.trailing.equalTo(self.snp.trailing).offset(-14)
             make.bottom.equalTo(self.snp.bottom).offset(-18)
+        }
+    }
+    
+    public var cardImg: CardIcon? {
+        didSet {
+            guard let cardImg = cardImg else {return}
+                    
+            if let logo = cardImg.cardLogo {
+                cardIcon.image = UIImage(named: logo)?.withRenderingMode(.alwaysOriginal)
+            }
         }
     }
     
@@ -347,7 +362,7 @@ final class P2PTableViewCell: UITableViewCell {
 
 // MARK: - Main Controller
 
-final class P2PViewController: UIViewController, UITextFieldDelegate {
+final class P2PViewController: UIViewController {
     
     var cellData = [
         BankInfo(clientName: "Alisher Djuraev", clientCard: "8600 31** **** 3593", bankImage: "aloqaImg"),
@@ -373,7 +388,31 @@ final class P2PViewController: UIViewController, UITextFieldDelegate {
         BankInfo(clientName: "Rihanna Fenty", clientCard: "8600 33** **** 9999", bankImage: "ziraatImg")
     ]
     
-    var filteredCellData: [Any] = []
+    var iconArray = [
+        IconInfo(iconImg: "aloqaImg"),
+        IconInfo(iconImg: "agroImg"),
+        IconInfo(iconImg: "asakaImg"),
+        IconInfo(iconImg: "hamkorImg"),
+        IconInfo(iconImg: "hitechImg"),
+        IconInfo(iconImg: "infinImg"),
+        IconInfo(iconImg: "ipakyoliImg"),
+        IconInfo(iconImg: "ipotekaImg"),
+        IconInfo(iconImg: "kapitalImg"),
+        IconInfo(iconImg: "kdbImg"),
+        IconInfo(iconImg: "nbuImg"),
+        IconInfo(iconImg: "orientfinansImg"),
+        IconInfo(iconImg: "qishloqqurilishImg"),
+        IconInfo(iconImg: "savdogarImg"),
+        IconInfo(iconImg: "sqbImg"),
+        IconInfo(iconImg: "trastImg"),
+        IconInfo(iconImg: "turkistonImg"),
+        IconInfo(iconImg: "turonImg"),
+        IconInfo(iconImg: "universalImg"),
+        IconInfo(iconImg: "xalqImg"),
+        IconInfo(iconImg: "ziraatImg")
+    ]
+    
+    var filteredCellData: [BankInfo] = []
     var searching: Bool = false
     
     private let headerLabel: UILabel = {
@@ -406,7 +445,6 @@ final class P2PViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
         
-        headView.cardTextField.delegate = self
         headView.cardTextField.addTarget(self, action: #selector(txtValueChanged(_ :)), for: .editingChanged)
         
         self.setupUI()
@@ -414,7 +452,8 @@ final class P2PViewController: UIViewController, UITextFieldDelegate {
         self.setupTableView()
     }
     
-    @objc func txtValueChanged(_ sender: AnyObject) {
+    @objc func txtValueChanged(_ sender: UITextField) {
+        
         if sender.text?.count == 0 {
             self.receiverView.isHidden = false
             self.transferView.isHidden = false
@@ -422,6 +461,17 @@ final class P2PViewController: UIViewController, UITextFieldDelegate {
             self.receiverView.isHidden = true
             self.transferView.isHidden = true
         }
+        
+        let searchText  = sender.text!
+        
+        filteredCellData = self.cellData.filter({(($0.clientCard!).localizedCaseInsensitiveContains(searchText))})
+        
+        if (filteredCellData.count == 0){
+            searching = false;
+        } else {
+            searching = true;
+        }
+        self.tableView.reloadData()
     }
     
     private func setupTableView() {
@@ -492,22 +542,6 @@ final class P2PViewController: UIViewController, UITextFieldDelegate {
         self.view.endEditing(true)
         self.resignFirstResponder()
     }
-    
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool{
-           //input text
-          let searchText  = textField.text! + string
-           //add matching text to arrya
-        filteredCellData = self.cellData.filter({(($0.clientCard!).localizedCaseInsensitiveContains(searchText))})
-           
-           if(filteredCellData.count == 0){
-               searching = false
-           }else{
-               searching = true
-           }
-           self.tableView.reloadData();
-           
-           return true
-       }
 }
 
 // MARK: - Main Controller Extension
@@ -515,7 +549,7 @@ final class P2PViewController: UIViewController, UITextFieldDelegate {
 extension P2PViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if( searching == true){
+        if searching {
             return filteredCellData.count
         } else {
             return cellData.count
@@ -526,8 +560,8 @@ extension P2PViewController: UITableViewDelegate, UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: P2PTableViewCell.identifier, for: indexPath) as? P2PTableViewCell else {
             return UITableViewCell()
         }
-        if ( searching == true){
-            cell.bankItem = filteredCellData[indexPath.row] as? BankInfo
+        if ( searching == true) {
+            cell.bankItem = filteredCellData[indexPath.row]
         } else {
             cell.bankItem = cellData[indexPath.row]
         }
