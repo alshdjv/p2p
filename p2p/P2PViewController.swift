@@ -18,10 +18,6 @@ struct IconInfo {
 // MARK: - HeaderView
 
 final class HeaderView: UIView {
-    
-    struct CardIcon {
-        let cardLogo: String?
-    }
 
     private let cardIcon: UIImageView = {
         let image = UIImage(named: "cardImg")
@@ -38,7 +34,6 @@ final class HeaderView: UIView {
         textField.becomeFirstResponder()
         textField.clearButtonMode = .whileEditing
         textField.keyboardType = .decimalPad
-
         return textField
     }()
     
@@ -60,8 +55,8 @@ final class HeaderView: UIView {
     }
     
     private func setSubviews() {
-        self.addSubview(cardIcon)
         self.addSubview(cardTextField)
+        self.cardTextField.addSubview(cardIcon)
     }
     
     private func setConstraints() {
@@ -78,16 +73,6 @@ final class HeaderView: UIView {
             make.leading.equalTo(self.cardIcon.snp.trailing).offset(14)
             make.trailing.equalTo(self.snp.trailing).offset(-14)
             make.bottom.equalTo(self.snp.bottom).offset(-18)
-        }
-    }
-    
-    public var cardImg: CardIcon? {
-        didSet {
-            guard let cardImg = cardImg else {return}
-                    
-            if let logo = cardImg.cardLogo {
-                cardIcon.image = UIImage(named: logo)?.withRenderingMode(.alwaysOriginal)
-            }
         }
     }
     
@@ -364,6 +349,11 @@ final class P2PTableViewCell: UITableViewCell {
 
 final class P2PViewController: UIViewController {
     
+    enum ChainCard {
+        case activeCard
+        case inactiveCard
+    }
+    
     var cellData = [
         BankInfo(clientName: "Alisher Djuraev", clientCard: "8600 31** **** 3593", bankImage: "aloqaImg"),
         BankInfo(clientName: "Fazliddin Murtazoev", clientCard: "8600 31** **** 4422", bankImage: "agroImg"),
@@ -441,10 +431,31 @@ final class P2PViewController: UIViewController {
         return tableView
     }()
     
+    // If the card is not in a table cell
+    /////////////////////////////////////////////////
+    
+    private let cardIsEmpty: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(red: 213/255, green: 213/255, blue: 214/255, alpha: 1.0)
+        view.layer.cornerRadius = 20.0
+        view.isHidden = true
+        return view
+    }()
+    
+    private let cardNotFound: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 17, weight: .semibold)
+        label.text = "Карта не найдена"
+        label.textColor = .white
+        return label
+    }()
+  
+    // MARK: - Init viewDidLoad()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
-        
+    
         headView.cardTextField.addTarget(self, action: #selector(txtValueChanged(_ :)), for: .editingChanged)
         
         self.setupUI()
@@ -457,20 +468,24 @@ final class P2PViewController: UIViewController {
         if sender.text?.count == 0 {
             self.receiverView.isHidden = false
             self.transferView.isHidden = false
+            self.filteredCellData = self.cellData
         } else {
             self.receiverView.isHidden = true
             self.transferView.isHidden = true
+            guard let searchText  = sender.text else { return }
+            
+            filteredCellData = self.cellData.filter({(($0.clientCard!).localizedCaseInsensitiveContains(searchText))})
         }
         
-        let searchText  = sender.text!
         
-        filteredCellData = self.cellData.filter({(($0.clientCard!).localizedCaseInsensitiveContains(searchText))})
-        
-        if (filteredCellData.count == 0){
-            searching = false;
+        if (filteredCellData.count == 0) {
+            configure(state: .activeCard)
+            searching = false
         } else {
-            searching = true;
+            configure(state: .inactiveCard)
+            searching = true
         }
+        
         self.tableView.reloadData()
     }
     
@@ -494,6 +509,9 @@ final class P2PViewController: UIViewController {
         self.stackView.addArrangedSubview(transferView)
         self.view.addSubview(stackView)
         self.view.addSubview(tableView)
+        
+        self.view.addSubview(cardIsEmpty)
+        self.cardIsEmpty.addSubview(cardNotFound)
     }
     
     private func setConstraints() {
@@ -528,9 +546,34 @@ final class P2PViewController: UIViewController {
             make.leading.trailing.equalTo(self.view.safeAreaLayoutGuide)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide)
         }
+        
+        // tableviewcell doens't contain card number
+        cardIsEmpty.snp.makeConstraints { make in
+            make.top.equalTo(self.headView.snp.bottom).offset(24)
+            make.leading.equalTo(self.view.snp.leading).offset(16)
+            make.trailing.equalTo(self.view.snp.trailing).offset(-16)
+            make.height.equalTo(88)
+        }
+        
+        cardNotFound.snp.makeConstraints { make in
+            make.height.equalTo(20)
+            make.centerX.equalTo(self.cardIsEmpty.snp.centerX)
+            make.centerY.equalTo(self.cardIsEmpty.snp.centerY)
+        }
     }
     
     // MARK: - Main Controller Methods
+    
+    public func configure(state: ChainCard) {
+        switch state {
+        case .activeCard:
+            cardIsEmpty.isHidden = false
+            tableView.isHidden = true
+        case .inactiveCard:
+            cardIsEmpty.isHidden = true
+            tableView.isHidden = false
+        }
+    }
     
     private func dismissKey() {
         let tap: UITapGestureRecognizer = UITapGestureRecognizer( target: self, action: #selector(dismissKeyboard))
